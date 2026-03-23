@@ -1,8 +1,9 @@
-"""Smoke tests: FFmpeg パイプラインとデバイス列挙。"""
+"""Smoke tests for ffmpeg pipeline and path defaults."""
 
 from __future__ import annotations
 
 import io
+import re
 import shutil
 import struct
 import sys
@@ -19,7 +20,7 @@ if str(ROOT) not in sys.path:
 
 def test_wav_to_mp3(tmp_path: Path) -> None:
     if not shutil.which("ffmpeg"):
-        pytest.skip("ffmpeg が PATH にありません")
+        pytest.skip("ffmpeg 縺・PATH 縺ｫ縺ゅｊ縺ｾ縺帙ｓ")
 
     import record_loopback_to_mp3 as rec
 
@@ -45,11 +46,24 @@ def test_list_devices_does_not_crash() -> None:
         rec._list_recording_targets()
 
 
+def test_resolve_output_mp3_path(tmp_path: Path) -> None:
+    import record_loopback_to_mp3 as rec
+
+    p = rec.resolve_output_mp3_path(None, None)
+    assert re.fullmatch(r"\d{12}\.mp3", p.name)
+    assert p.parent.name == "output"
+
+    q = rec.resolve_output_mp3_path(Path("clip.mp3"), tmp_path)
+    assert q.name == "clip.mp3"
+    assert q.parent.resolve() == tmp_path.resolve()
+
+
 def test_transcription_helpers() -> None:
     from transcription import DEFAULT_LANGUAGE, DEFAULT_MODEL, segments_to_srt
 
     assert DEFAULT_MODEL == "large-v3"
     assert DEFAULT_LANGUAGE == "ja"
-    srt = segments_to_srt([(0.0, 1.0, "こんにちは")])
+    srt = segments_to_srt([(0.0, 1.0, "hello")])
     assert "1" in srt
-    assert "こんにちは" in srt
+    assert "hello" in srt
+

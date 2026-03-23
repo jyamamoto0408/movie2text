@@ -60,15 +60,27 @@ PowerShell では **コマンド全体を 1 行で** 入力してください。
 # 一覧（Windows は「ループバック」として録音に使う出力デバイス名）
 python record_loopback_to_mp3.py --list-devices
 
-# 60 秒録音
+# 60 秒録音（-o 省略時は ./output/YYMMDDHHmmSS.mp3）
+python record_loopback_to_mp3.py -d 60
+
+# ファイル名を指定
 python record_loopback_to_mp3.py -d 60 -o out.mp3
 
-# Ctrl+C まで録音
-python record_loopback_to_mp3.py -o out.mp3
+# 出力フォルダを指定（相対の -o はこのフォルダ基準。フォルダが無ければ作成します）
+python record_loopback_to_mp3.py -d 60 -O C:\work\recordings -o take1.mp3
+
+# フォルダのみ（ファイル名は実行時刻の YYMMDDHHmmSS.mp3）
+python record_loopback_to_mp3.py -d 60 -O C:\work\recordings
+
+# Ctrl+C まで録音（ファイル名はタイムスタンプ）
+python record_loopback_to_mp3.py
 
 # 録音後に文字起こし（large-v3 / 日本語）
 python record_loopback_to_mp3.py -d 120 -o out.mp3 --transcribe
 ```
+
+`-o` に **絶対パス** を書いた場合はそのパスに保存し、`-O` は無視されます。
+`-o` も `-O` も省略した場合は、`./output` に保存します。
 
 特定の出力デバイスを使う場合: `--speaker "一覧に出た名前の一部"`（Windows はスピーカー本体ではなく、ループバック用エントリにマッチします）。
 
@@ -88,7 +100,7 @@ python transcribe_mp3.py path\to\audio.mp3
 
 処理中は標準エラーに `[文字起こし]` で始まる進捗が出ます。
 
-出力は同じフォルダに `audio.txt` と `audio.srt`（入力ファイル名の stem）。別フォルダへ出す場合:
+出力は既定で `./output` に `audio.txt` と `audio.srt`（入力ファイル名の stem）。別フォルダへ出す場合:
 
 ```powershell
 python transcribe_mp3.py path\to\audio.mp3 -o C:\work\out

@@ -4,6 +4,7 @@ __pycache__/
 *.py[cod]
 .DS_Store
 output/
+output_text/
 
 # 作業用の録音・文字起こし出力（誤コミット防止）
 out.mp3

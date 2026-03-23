@@ -1,4 +1,4 @@
-"""Transcribe an existing MP3 (or other audio file supported by faster-whisper)."""
+"""Transcribe an existing audio file with faster-whisper."""
 
 from __future__ import annotations
 
@@ -10,51 +10,29 @@ from transcription import DEFAULT_LANGUAGE, DEFAULT_MODEL, transcribe_file
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="既存の MP3 などから文字起こし（既定モデル: large-v3、言語: ja）",
-    )
-    parser.add_argument(
-        "audio",
-        type=Path,
-        help="入力音声ファイル（MP3/WAV など）",
-    )
+    parser = argparse.ArgumentParser(description="Transcribe existing audio")
+    parser.add_argument("audio", type=Path, help="Input audio file (mp3/wav/...)")
     parser.add_argument(
         "-o",
         "--output-dir",
         type=Path,
         default=None,
-        help="txt/srt の出力ディレクトリ（既定: 入力と同じフォルダ）",
+        help="Output directory for txt/srt (default: ./output)",
     )
-    parser.add_argument(
-        "--txt",
-        type=Path,
-        default=None,
-        help="出力テキストのパス（指定時は --output-dir より優先）",
-    )
-    parser.add_argument(
-        "--srt",
-        type=Path,
-        default=None,
-        help="出力 SRT のパス（指定時は --output-dir より優先）",
-    )
-    parser.add_argument(
-        "--model",
-        default=DEFAULT_MODEL,
-        help=f"Whisper モデル（既定: {DEFAULT_MODEL}）",
-    )
-    parser.add_argument(
-        "--language",
-        default=DEFAULT_LANGUAGE,
-        help=f"言語コード（既定: {DEFAULT_LANGUAGE}）",
-    )
+    parser.add_argument("--txt", type=Path, default=None, help="Explicit output txt path")
+    parser.add_argument("--srt", type=Path, default=None, help="Explicit output srt path")
+    parser.add_argument("--model", default=DEFAULT_MODEL, help=f"Whisper model (default: {DEFAULT_MODEL})")
+    parser.add_argument("--language", default=DEFAULT_LANGUAGE, help=f"Language code (default: {DEFAULT_LANGUAGE})")
     args = parser.parse_args()
 
     audio = args.audio.resolve()
     if not audio.is_file():
-        print(f"ファイルが見つかりません: {audio}", file=sys.stderr)
+        print(f"Audio file not found: {audio}", file=sys.stderr)
         sys.exit(1)
 
-    base_dir = args.output_dir.resolve() if args.output_dir else audio.parent
+    base_dir = args.output_dir.resolve() if args.output_dir else (Path.cwd() / "output").resolve()
+    base_dir.mkdir(parents=True, exist_ok=True)
+
     stem = audio.stem
     txt_path = args.txt.resolve() if args.txt else (base_dir / f"{stem}.txt")
     srt_path = args.srt.resolve() if args.srt else (base_dir / f"{stem}.srt")
@@ -72,3 +50,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
